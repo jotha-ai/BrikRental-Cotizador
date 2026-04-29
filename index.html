@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brik Car Rental — Cotizador</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+    --orange:#F05A28;
+    --navy:#0D1B2A;
+    --cream:#F7F9FB; /* El color original del código */
+    --white:#FFFFFF;
+    --gray:#8A96A3;
+    --light:#EEF2F6;
+    --border:#DDE3EA;
+    --green:#16A34A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);min-height:100vh;color:var(--navy)}
+
+/* Pantalla de Login */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:var(--navy)}
+.login-card{background:white;border-radius:24px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.login-logo-name{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--navy);line-height:1;text-align:center}
+.login-logo-sub{font-size:11px;color:var(--orange);letter-spacing:0.12em;text-transform:uppercase;margin-top:4px;text-align:center;margin-bottom:28px}
+.login-field input{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;outline:none;margin-bottom:15px}
+.btn-login{width:100%;padding:15px;background:var(--orange);color:white;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;cursor:pointer}
+
+/* Pantalla App */
+#appScreen{display:none;padding:20px 14px 60px}
+.container{max-width:540px;margin:0 auto}
+.top-bar{background:var(--navy);border-radius:18px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.logo-name{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:white;line-height:1}
+.logo-sub{font-size:10px;color:var(--orange);letter-spacing:0.12em;text-transform:uppercase}
+
+.card{background:var(--white);border-radius:16px;padding:20px;margin-bottom:14px;border:1px solid var(--border)}
+.card-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--orange);margin-bottom:16px}
+
+input[type="text"], input[type="number"], input[type="date"], select{
+    width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;margin-bottom:10px;outline:none;
+}
+
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cat-btn{border:1.5px solid var(--border);border-radius:12px;padding:12px 10px;cursor:pointer;text-align:center;background:white}
+.cat-btn.active{border-color:var(--orange);background:#FEF3EE}
+
+.btn-gen{width:100%;padding:16px;background:var(--orange);color:white;border:none;border-radius:14px;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;cursor:pointer;margin-top:10px}
+
+/* Resultado */
+.result-card{display:none;background:white;border-radius:16px;border:1px solid var(--border);margin-top:15px;overflow:hidden}
+.result-top{background:var(--navy);padding:18px 20px;color:white}
+.msg-box{background:var(--cream);border-radius:12px;padding:16px;font-size:13px;margin:15px;white-space:pre-wrap;border:1px solid var(--border)}
+.btn-copy{width:calc(100% - 30px);margin:0 15px 15px;padding:13px;background:var(--orange);color:white;border:none;border-radius:12px;font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+    <div class="login-card">
+        <div class="login-logo-name">Brik</div>
+        <div class="login-logo-sub">Car Rental</div>
+        <input type="password" id="claveInput" placeholder="Clave de acceso" onkeydown="if(event.key==='Enter')verificar()">
+        <div id="loginError" style="color:red; font-size:12px; margin-bottom:10px; text-align:center"></div>
+        <button class="btn-login" onclick="verificar()">Ingresar →</button>
+    </div>
+</div>
+
+<div id="appScreen">
+    <div class="container">
+        <div class="top-bar">
+            <div><div class="logo-name">Brik</div><div class="logo-sub">Car Rental</div></div>
+            <button style="background:rgba(255,255,255,0.1);color:white;border:none;padding:5px 12px;border-radius:20px;font-size:11px" onclick="cerrarSesion()">Salir</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Datos del cliente</div>
+            <input type="text" id="nombre" placeholder="Nombre del cliente">
+            <div style="display:flex; gap:10px">
+                <input type="date" id="fecha_ini">
+                <input type="date" id="fecha_fin">
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Categoría</div>
+            <div class="cat-grid">
+                <div class="cat-btn active" onclick="selectCat(this,'COMPACTO',19.99)">
+                    <div style="font-weight:700">Compacto</div>
+                    <div style="font-size:10px; color:var(--gray)">Versa, Corolla</div>
+                </div>
+                <div class="cat-btn" onclick="selectCat(this,'SUV',29.99)">
+                    <div style="font-weight:700">SUV</div>
+                    <div style="font-size:10px; color:var(--gray)">RAV4, Rogue</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Reserva</div>
+            <input type="number" id="reservaInput" placeholder="Monto USD">
+        </div>
+
+        <button class="btn-gen" onclick="generar()">⚡ Generar Cotización</button>
+
+        <div class="result-card" id="resultCard">
+            <div class="result-top">
+                <div style="font-family:'Syne'; font-weight:800">Cotización lista ✓</div>
+            </div>
+            <div class="msg-box" id="msgBox"></div>
+            <button class="btn-copy" onclick="copiar()">📋 Copiar mensaje</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const CLAVE='brik2024';
+let catActual={nombre:'COMPACTO', precio:19.99};
+
+function verificar(){
+    const val = document.getElementById('claveInput').value;
+    if(val===CLAVE){
+        document.getElementById('loginScreen').style.display='none';
+        document.getElementById('appScreen').style.display='block';
+    } else {
+        document.getElementById('loginError').textContent='Clave incorrecta';
+    }
+}
+
+function cerrarSesion(){
+    document.getElementById('appScreen').style.display='none';
+    document.getElementById('loginScreen').style.display='flex';
+}
+
+function selectCat(el, nom, precio){
+    document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+    el.classList.add('active');
+    catActual={nombre:nom, precio:precio};
+}
+
+function generar(){
+    const nom = document.getElementById('nombre').value;
+    const res = document.getElementById('reservaInput').value;
+    const msg = `🚗 *Brik Car Rental*\n\n*Cliente:* ${nom}\n*Categoría:* ${catActual.nombre}\n*Reserva:* $${res}`;
+    document.getElementById('msgBox').textContent = msg;
+    document.getElementById('resultCard').style.display = 'block';
+    window.msgFinal = msg;
+}
+
+function copiar(){
+    navigator.clipboard.writeText(window.msgFinal);
+    alert('¡Copiado!');
+}
+</script>
+</body>
+</html>
